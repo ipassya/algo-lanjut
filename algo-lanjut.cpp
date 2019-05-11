@@ -38,6 +38,7 @@ void binary(int &jmlData, buku perpus[]);
 void readDataTransaksi(ifstream &dataIn, int &jmlData, buku perpus[], string &myFile);
 void writeDataTransaksi(fstream &data, int &jmlData, buku perpus[], string &myFileTransaksi);
 void readDataHasilTransaksi(ifstream &dataIn, int &jmlData, buku perpus[], string &myFileTransaksi);
+void readDataHasilTransaksiUrut(fstream &data, ifstream &dataIn, int &jmlData, buku perpus[], string &myFileTransaksi);
 
 int main(){
 	fstream data;
@@ -151,6 +152,19 @@ int main(){
 						break;
 					case MERGING_URUT :
 						cout << "\nMerging Urut" << endl;
+						cout << "\n-----------------------------------\n";
+						cout << "\nMasukkan nama file hasil transaksi : "; cin >> myFileTransaksi;
+						cout << "\n-----------------------------------\n";
+						cout << "Masukan nama file pertama : "; 
+						readDataTransaksi(dataIn, jmlData, perpus, myFile);
+						writeDataTransaksi(data, jmlData, perpus, myFileTransaksi);
+						cout << "\n-----------------------------------\n";
+						cout << "Masukan nama file kedua : "; 
+						readDataTransaksi(dataIn, jmlData, perpus, myFile);
+						writeDataTransaksi(data, jmlData, perpus, myFileTransaksi);
+						cout << "\n===================================\n";
+						cout << "Hasil merging Urut" << endl;
+						readDataHasilTransaksiUrut(data, dataIn, jmlData, perpus, myFileTransaksi);
 						break;
 					case UPDATING :
 						cout << "\nUpdating" << endl;
@@ -235,9 +249,9 @@ int getOptionTransaksi(int &pilih){
 	cout << "========================" << endl;
 	cout << "1. Konsolidasi" << endl;
 	cout << "2. Merging Sambung" << endl;
-	cout << "2. Merging Urut" << endl;
-	cout << "2. Updating" << endl;
-	cout << "2. Splitting" << endl;
+	cout << "3. Merging Urut" << endl;
+	cout << "4. Updating" << endl;
+	cout << "5. Splitting" << endl;
 	cout << "========================" << endl;
 	cout << "Pilih Sorting [1-5] : "; cin >> pilih;
 	
@@ -633,6 +647,63 @@ void readDataHasilTransaksi(ifstream &dataIn, int &jmlData, buku perpus[], strin
 			cout << "Tanggal/Bulan/Tahun Pinjam : " << perpus[i].pinjam << endl;
 			cout << "Tanggal/Bulan/Tahun Pengembalian : " << perpus[i].pengembalian << endl;
 		}
+	}else{
+		cout << "File " << myFileTransaksi << " tidak ditemukan" << endl;
+		dataIn.close();
+		goto label_continue;
+	}
+}
+
+void readDataHasilTransaksiUrut(fstream &data, ifstream &dataIn, int &jmlData, buku perpus[], string &myFileTransaksi){
+	label_continue :
+	int i = 0;
+	dataIn.open(myFileTransaksi, ios::in);
+	if(dataIn.is_open()){
+		while(!dataIn.eof()){
+			getline(dataIn, perpus[i].mahasiswa.nama);
+			getline(dataIn, perpus[i].mahasiswa.nim);
+			getline(dataIn, perpus[i].mahasiswa.jurusan);
+			getline(dataIn, perpus[i].judul);
+			getline(dataIn, perpus[i].kode);
+			getline(dataIn, perpus[i].pinjam);
+			getline(dataIn, perpus[i].pengembalian);
+			
+			i++;
+		}
+		jmlData = i-1;
+		dataIn.close();
+		
+		for(int i=0; i < jmlData-1; i++){
+			for(int j=0; j < jmlData-1-i; j++){
+				if(perpus[j].mahasiswa.nama > perpus[j+1].mahasiswa.nama){
+					temp = perpus[j];
+					perpus[j] = perpus[j+1];
+					perpus[j+1] = temp;
+				}
+			}
+		}
+		for(int i = 0; i < jmlData ; i++){
+			cout << "\nData peminjam buku ke-" << i+1 << endl;
+			cout << "Nama : " << perpus[i].mahasiswa.nama << endl;
+			cout << "NIM : " << perpus[i].mahasiswa.nim << endl;
+			cout << "Jurusan : " << perpus[i].mahasiswa.jurusan << endl;
+			cout << "Judul Buku : " << perpus[i].judul << endl;
+			cout << "Kode Buku : " << perpus[i].kode << endl;
+			cout << "Tanggal/Bulan/Tahun Pinjam : " << perpus[i].pinjam << endl;
+			cout << "Tanggal/Bulan/Tahun Pengembalian : " << perpus[i].pengembalian << endl;
+		}
+		
+		data.open(myFileTransaksi, ios::trunc | ios::out);
+		for(int i = 0; i < jmlData; i++){
+			data << perpus[i].mahasiswa.nama << endl;
+			data << perpus[i].mahasiswa.nim << endl;
+			data << perpus[i].mahasiswa.jurusan << endl;
+			data << perpus[i].judul << endl;
+			data << perpus[i].kode << endl;
+			data << perpus[i].pinjam << endl;
+			data << perpus[i].pengembalian << endl;
+		}
+		data.close();
 	}else{
 		cout << "File " << myFileTransaksi << " tidak ditemukan" << endl;
 		dataIn.close();
