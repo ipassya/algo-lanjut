@@ -20,7 +20,6 @@ int getOption(int &pilih);
 int getOptionSearch(int &pilih);
 int getOptionSort(int &pilih);
 int getOptionTransaksi(int &pilih);
-//void checkDatabase(ofstream &dataOut);
 void writeData(fstream &data, int &jmlData, buku perpus[], string &myFile);
 void input(fstream &data, int &jmlData, string &myFile);
 void output(int &jmlData);
@@ -35,15 +34,15 @@ void mergeSort(buku perpus[], int l, int r);
 void quick(buku perpus[], int first, int last);
 void writeDataSort(fstream &data, int &jmlData, buku perpus[], string &myFile);
 void binary(int &jmlData, buku perpus[]);
-void readDataTransaksi(ifstream &dataIn, int &jmlData, buku perpus[], string &myFile);
-void writeDataTransaksi(fstream &data, int &jmlData, buku perpus[], string &myFileTransaksi);
-void readDataHasilTransaksi(ifstream &dataIn, int &jmlData, buku perpus[], string &myFileTransaksi);
-void readDataHasilTransaksiUrut(fstream &data, ifstream &dataIn, int &jmlData, buku perpus[], string &myFileTransaksi);
+void readDataMerging(ifstream &dataIn, int &jmlData, buku perpus[], string &myFile);
+void writeDataMerging(fstream &data, int &jmlData, buku perpus[], string &myFileTransaksi);
+void readDataMergingSambung(ifstream &dataIn, int &jmlData, buku perpus[], string &myFileTransaksi);
+void readDataMergingUrut(fstream &data, ifstream &dataIn, int &jmlData, buku perpus[], string &myFileTransaksi);
+void splitting(ifstream &dataIn, fstream &data, int &jmlData, buku perpus[]);
 
 int main(){
 	fstream data;
 	ifstream dataIn;
-	//ofstream dataOut;
 	string myFile, myFileTransaksi;
 	char is_continue;
 	int pilih, jmlData;
@@ -51,9 +50,8 @@ int main(){
 	enum option{INPUT = 1, SEARCHING, TRANSAKSI, EXIT};
 	enum optionSearch{SEQUENTIAL = 1, BINARY, BACK};
 	enum optionSort{BUBBLE = 1, SELECTION, INSERTION, SHELL, MERGE, QUICK};
-	enum optionTransaksi{KONSOLIDASI = 1, MERGING_SAMBUNG, MERGING_URUT, UPDATING, SPLITTING};
+	enum optionTransaksi{MERGING_SAMBUNG = 1, MERGING_URUT, SPLITTING};
 	
-	//checkDatabase(dataOut);
 	int pilihan = getOption(pilih);
 	while(pilihan != EXIT){
 		switch(pilihan){
@@ -131,24 +129,21 @@ int main(){
 			case TRANSAKSI:
 				pilihan = getOptionTransaksi(pilih);
 				switch(pilihan){
-					case KONSOLIDASI :
-						cout << "\nKonsolidasi" << endl;
-						break;
 					case MERGING_SAMBUNG :
 						cout << "\nMerging Sambung" << endl;
 						cout << "\n-----------------------------------\n";
 						cout << "\nMasukkan nama file hasil transaksi : "; cin >> myFileTransaksi;
 						cout << "\n-----------------------------------\n";
 						cout << "Masukan nama file pertama : "; 
-						readDataTransaksi(dataIn, jmlData, perpus, myFile);
-						writeDataTransaksi(data, jmlData, perpus, myFileTransaksi);
+						readDataMerging(dataIn, jmlData, perpus, myFile);
+						writeDataMerging(data, jmlData, perpus, myFileTransaksi);
 						cout << "\n-----------------------------------\n";
 						cout << "Masukan nama file kedua : "; 
-						readDataTransaksi(dataIn, jmlData, perpus, myFile);
-						writeDataTransaksi(data, jmlData, perpus, myFileTransaksi);
+						readDataMerging(dataIn, jmlData, perpus, myFile);
+						writeDataMerging(data, jmlData, perpus, myFileTransaksi);
 						cout << "\n===================================\n";
 						cout << "Hasil merging sambung" << endl;
-						readDataHasilTransaksi(dataIn, jmlData, perpus, myFileTransaksi);
+						readDataMergingSambung(dataIn, jmlData, perpus, myFileTransaksi);
 						break;
 					case MERGING_URUT :
 						cout << "\nMerging Urut" << endl;
@@ -156,21 +151,21 @@ int main(){
 						cout << "\nMasukkan nama file hasil transaksi : "; cin >> myFileTransaksi;
 						cout << "\n-----------------------------------\n";
 						cout << "Masukan nama file pertama : "; 
-						readDataTransaksi(dataIn, jmlData, perpus, myFile);
-						writeDataTransaksi(data, jmlData, perpus, myFileTransaksi);
+						readDataMerging(dataIn, jmlData, perpus, myFile);
+						writeDataMerging(data, jmlData, perpus, myFileTransaksi);
 						cout << "\n-----------------------------------\n";
 						cout << "Masukan nama file kedua : "; 
-						readDataTransaksi(dataIn, jmlData, perpus, myFile);
-						writeDataTransaksi(data, jmlData, perpus, myFileTransaksi);
+						readDataMerging(dataIn, jmlData, perpus, myFile);
+						writeDataMerging(data, jmlData, perpus, myFileTransaksi);
 						cout << "\n===================================\n";
 						cout << "Hasil merging Urut" << endl;
-						readDataHasilTransaksiUrut(data, dataIn, jmlData, perpus, myFileTransaksi);
-						break;
-					case UPDATING :
-						cout << "\nUpdating" << endl;
+						readDataMergingUrut(data, dataIn, jmlData, perpus, myFileTransaksi);
 						break;
 					case SPLITTING :
 						cout << "\nSplitting" << endl;
+						cout << "\n-----------------------------------\n";
+						readData(dataIn, jmlData, perpus, myFile);
+						splitting(dataIn, data, jmlData, perpus);
 						break;
 					default :
 						cout << "Pilihan tidak ditemukan" << endl;
@@ -247,26 +242,14 @@ int getOptionTransaksi(int &pilih){
 	system("cls");
 	cout << "Menu Transaksi" << endl;
 	cout << "========================" << endl;
-	cout << "1. Konsolidasi" << endl;
-	cout << "2. Merging Sambung" << endl;
-	cout << "3. Merging Urut" << endl;
-	cout << "4. Updating" << endl;
-	cout << "5. Splitting" << endl;
+	cout << "1. Merging Sambung" << endl;
+	cout << "2. Merging Urut" << endl;
+	cout << "3. Splitting" << endl;
 	cout << "========================" << endl;
-	cout << "Pilih Sorting [1-5] : "; cin >> pilih;
+	cout << "Pilih Sorting [1-3] : "; cin >> pilih;
 	
 	return pilih;
 }
-
-/*void checkDatabase(ofstream &dataOut){
-	dataOut.open("data", ios::out | ios::in);
-	// check file ada atau tidak
-	if(dataOut.is_open()){
-	}else{
-		dataOut.close();
-		dataOut.open("data", ios::trunc | ios::out | ios::in);
-	}
-}*/
 
 void writeData(fstream &data, int &jmlData, buku perpus[], string &myFile){
 	data.open(myFile, ios::trunc | ios::out);
@@ -568,7 +551,7 @@ void binary(int &jmlData, buku perpus[]){
 	}
 }
 
-void readDataTransaksi(ifstream &dataIn, int &jmlData, buku perpus[], string &myFile){
+void readDataMerging(ifstream &dataIn, int &jmlData, buku perpus[], string &myFile){
 	label_continue :
 	int i = 0;
 	cin >> myFile;
@@ -604,7 +587,7 @@ void readDataTransaksi(ifstream &dataIn, int &jmlData, buku perpus[], string &my
 	}
 }
 
-void writeDataTransaksi(fstream &data, int &jmlData, buku perpus[], string &myFileTransaksi){
+void writeDataMerging(fstream &data, int &jmlData, buku perpus[], string &myFileTransaksi){
 	data.open(myFileTransaksi, ios::app | ios::out);
 	
 	for(int i = 0; i < jmlData; i++){
@@ -619,7 +602,7 @@ void writeDataTransaksi(fstream &data, int &jmlData, buku perpus[], string &myFi
 	data.close();
 }
 
-void readDataHasilTransaksi(ifstream &dataIn, int &jmlData, buku perpus[], string &myFileTransaksi){
+void readDataMergingSambung(ifstream &dataIn, int &jmlData, buku perpus[], string &myFileTransaksi){
 	label_continue :
 	int i = 0;
 	dataIn.open(myFileTransaksi, ios::in);
@@ -654,7 +637,7 @@ void readDataHasilTransaksi(ifstream &dataIn, int &jmlData, buku perpus[], strin
 	}
 }
 
-void readDataHasilTransaksiUrut(fstream &data, ifstream &dataIn, int &jmlData, buku perpus[], string &myFileTransaksi){
+void readDataMergingUrut(fstream &data, ifstream &dataIn, int &jmlData, buku perpus[], string &myFileTransaksi){
 	label_continue :
 	int i = 0;
 	dataIn.open(myFileTransaksi, ios::in);
@@ -708,5 +691,126 @@ void readDataHasilTransaksiUrut(fstream &data, ifstream &dataIn, int &jmlData, b
 		cout << "File " << myFileTransaksi << " tidak ditemukan" << endl;
 		dataIn.close();
 		goto label_continue;
+	}
+}
+
+void splitting(ifstream &dataIn, fstream &data, int &jmlData, buku perpus[]){
+	string nim, myFileTransaksi1, myFileTransaksi2;
+	for(int i = 0; i < jmlData-1; i++){
+		for(int j = 0; j < jmlData-1-i; j++){
+			if(perpus[j].mahasiswa.nim > perpus[j+1].mahasiswa.nim){
+				temp = perpus[j];
+				perpus[j] = perpus[j+1];
+				perpus[j+1] = temp;
+			}
+		}
+	}
+	
+	cout << "\n-----------------------------------\n";
+	cout << "Masukkan NIM kurang dari : "; cin >> nim;
+	cout << "\nNIM < " << nim << " akan masuk file pertama" << endl;
+	cout << "NIM >= " << nim << " akan masuk file kedua" << endl;
+	cout << "\n-----------------------------------\n";
+	
+	int i, j, k;
+	bool found = false;
+	i = 0;
+	j = jmlData;
+	while((!found) & (i <= j)){
+		k = (i + j) / 2;
+		if(nim == perpus[k].mahasiswa.nim){
+			found = true;
+		}else if(nim < perpus[k].mahasiswa.nim){
+			j = k - 1;
+		}else{
+			i = k + 1;
+		}
+	}
+	int jmlData1 = jmlData;
+	jmlData1 -= k;
+	
+	cout << "Masukkan nama file pertama : "; cin >> myFileTransaksi1;
+	data.open(myFileTransaksi1, ios::trunc | ios::out);
+	
+	for(int i = 0; i < jmlData1; i++){
+		data << perpus[i].mahasiswa.nama << endl;
+		data << perpus[i].mahasiswa.nim << endl;
+		data << perpus[i].mahasiswa.jurusan << endl;
+		data << perpus[i].judul << endl;
+		data << perpus[i].kode << endl;
+		data << perpus[i].pinjam << endl;
+		data << perpus[i].pengembalian << endl;
+	}
+	data.close();
+	
+	cout << "Masukkan nama file kedua : "; cin >> myFileTransaksi2;
+	data.open(myFileTransaksi2, ios::trunc | ios::out);
+	
+	for(int i = k; i < jmlData; i++){
+		data << perpus[i].mahasiswa.nama << endl;
+		data << perpus[i].mahasiswa.nim << endl;
+		data << perpus[i].mahasiswa.jurusan << endl;
+		data << perpus[i].judul << endl;
+		data << perpus[i].kode << endl;
+		data << perpus[i].pinjam << endl;
+		data << perpus[i].pengembalian << endl;
+	}
+	data.close();
+	
+	cout << "\n-----------------------------------\n";
+	cout << "\nOutput File Pertama" << endl;
+	i = 0;
+	dataIn.open(myFileTransaksi1, ios::in);
+	while(!dataIn.eof()){
+		getline(dataIn, perpus[i].mahasiswa.nama);
+		getline(dataIn, perpus[i].mahasiswa.nim);
+		getline(dataIn, perpus[i].mahasiswa.jurusan);
+		getline(dataIn, perpus[i].judul);
+		getline(dataIn, perpus[i].kode);
+		getline(dataIn, perpus[i].pinjam);
+		getline(dataIn, perpus[i].pengembalian);
+		
+		i++;
+	}
+	jmlData = 0;
+	jmlData = i-1;
+	dataIn.close();
+	for(int i = 0; i < jmlData ; i++){
+		cout << "\nData peminjam buku ke-" << i+1 << endl;
+		cout << "Nama : " << perpus[i].mahasiswa.nama << endl;
+		cout << "NIM : " << perpus[i].mahasiswa.nim << endl;
+		cout << "Jurusan : " << perpus[i].mahasiswa.jurusan << endl;
+		cout << "Judul Buku : " << perpus[i].judul << endl;
+		cout << "Kode Buku : " << perpus[i].kode << endl;
+		cout << "Tanggal/Bulan/Tahun Pinjam : " << perpus[i].pinjam << endl;
+		cout << "Tanggal/Bulan/Tahun Pengembalian : " << perpus[i].pengembalian << endl;
+	}
+	
+	cout << "\n\nOutput File Kedua" << endl;
+	i = 0;
+	dataIn.open(myFileTransaksi2, ios::in);
+	while(!dataIn.eof()){
+		getline(dataIn, perpus[i].mahasiswa.nama);
+		getline(dataIn, perpus[i].mahasiswa.nim);
+		getline(dataIn, perpus[i].mahasiswa.jurusan);
+		getline(dataIn, perpus[i].judul);
+		getline(dataIn, perpus[i].kode);
+		getline(dataIn, perpus[i].pinjam);
+		getline(dataIn, perpus[i].pengembalian);
+		
+		i++;
+	}
+	jmlData = 0;
+	jmlData = i-1;
+	dataIn.close();
+	for(int i = 0; i < jmlData ; i++){
+		cout << "\nData peminjam buku ke-" << i+1 << endl;
+		cout << "Nama : " << perpus[i].mahasiswa.nama << endl;
+		cout << "NIM : " << perpus[i].mahasiswa.nim << endl;
+		cout << "Jurusan : " << perpus[i].mahasiswa.jurusan << endl;
+		cout << "Judul Buku : " << perpus[i].judul << endl;
+		cout << "Kode Buku : " << perpus[i].kode << endl;
+		cout << "Tanggal/Bulan/Tahun Pinjam : " << perpus[i].pinjam << endl;
+		cout << "Tanggal/Bulan/Tahun Pengembalian : " << perpus[i].pengembalian << endl;
 	}
 }
